@@ -1,8 +1,8 @@
 Package: tabbedPlots
 Type: Package
 Title: Tabbed Plots for R
-Version: 0.1-9
-Date: 2008-08-04
+Version: 0.2-0
+Date: 2010-08-14
 Author: Lars Hansen
 Maintainer: Tony Plate <tplate@acm.org>
 Depends: R (>= 2.7.0), grDevices, graphics, RGtk2 (>= 2.12.5-3), cairoDevice (>= 2.8)
@@ -11,4 +11,3 @@ Description: Provides a window that shows multiple plots in tabs.
 License: GPL
 LazyLoad: yes
 Copyright: Copyright (C) 2008 Black Mesa Capital LLC
-

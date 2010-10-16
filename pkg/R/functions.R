@@ -63,17 +63,22 @@
     ## level plot funcitons we want to track.
     require("graphics")
 
-    ## This is extremely supple. The 'expression' part deferres evaluation
-    ## until later. Necessary to get the tracing right. '.GlobalEnv' is
-    ## needed because these high level plotting funcitons end up there.
-    trace("plot.new",
-          expression(tabbedPlots.prePlotNewHook()),
-          expression(tabbedPlots.postPlotNewHook()),
-          print = FALSE, where = .GlobalEnv)
-    trace("par", expression(tabbedPlots.parHook()),
-          print = FALSE, where = .GlobalEnv)
-    trace("layout", expression(tabbedPlots.layoutHook()),
-          print = FALSE, where = .GlobalEnv)
+    setHook("plot.prenew", tabbedPlots.prePlotNewHook)
+    setHook("plot.new", tabbedPlots.postPlotNewHook)
+    ## Old way was using trace() for hook:
+    if (F) {
+        ## This is extremely subtle. The 'expression' part deferres evaluation
+        ## until later. Necessary to get the tracing right. '.GlobalEnv' is
+        ## needed because these high level plotting functons end up there.
+        trace("plot.new",
+              expression(tabbedPlots.prePlotNewHook()),
+              expression(tabbedPlots.postPlotNewHook()),
+              print = FALSE, where = .GlobalEnv)
+        trace("par", expression(tabbedPlots.parHook()),
+              print = FALSE, where = .GlobalEnv)
+        trace("layout", expression(tabbedPlots.layoutHook()),
+              print = FALSE, where = .GlobalEnv)
+    }
 
     if (statsIsAlreadyLoaded)
         require("stats", quietly = TRUE)

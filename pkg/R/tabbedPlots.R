@@ -15,11 +15,11 @@
 tabbedPlots.options <- function(...)
 {
     knowOptions <- c("active", "debug", "height", "reusePar", "width")
-    
+
     if (length(list(...)) == 0)
     {
         options = list()
-        
+
         for (i in seq(along = knowOptions))
             options[[i]] <- .get(knowOptions[[i]])
 
@@ -29,7 +29,7 @@ tabbedPlots.options <- function(...)
     else
     {
         options <- list(...)
-        
+
         for (option in names(options))
             if (is.na(match(option, knowOptions)))
                 warning("unknown option ", option)
@@ -42,45 +42,45 @@ tabbedPlots.options <- function(...)
 ## tabbedPlotsHook <- function()
 ## {
 ##     .in()
-##     
+##
 ##     ## Remove the device that was just created, if tabbedPlots
 ##     ## GUI is not up.
-## 
+##
 ##     if (!exists(".gui") || is.null(.gui))
 ##     {
 ##         cat("Calling dev.off\n")
 ##         dev.off()
 ##     }
-## 
+##
 ##     ## Create GUI if necessary and add a new tab with our own device.
 ##     if (is.null(.gui))
 ##         tabbedPlots()
 ##     else
 ##         tabbedPlots.new()
-## 
+##
 ##     ## Make sure that plot.new is called with
 ##     ## the new device in place.
 ##     setHook("plot.new", NULL, "replace")
 ##     plot.new()
 ##     setHook("plot.new", tabbedPlotsHook)
-##     
+##
 ##     .out()
 ## }
 
- 
+
 tabbedPlots.prePlotNewHook <- function()
 {
     if (!.get("active"))
         return()
-    
+
     .in()
 
     .set("plotNew", FALSE)
-    
+
     ## It the user called 'plot.new' he must want a new
     ## tab eventhought the last one is not done.
     highLevelPlotNew = .calledFromHighLevelPlottingFunction()
-    
+
     ## Create a new tab (plot), if we need to.
     if (.get("plotDone", .get("curPage")) || !highLevelPlotNew)
     {
@@ -101,7 +101,7 @@ tabbedPlots.prePlotNewHook <- function()
             }
         }
     }
-    
+
     .out()
 }
 
@@ -110,7 +110,7 @@ tabbedPlots.postPlotNewHook <- function()
 {
     if (!.get("active"))
         return()
-    
+
     .called()
 
     ## See if we are on the last figure. The plot is done
@@ -119,7 +119,7 @@ tabbedPlots.postPlotNewHook <- function()
     lastFigure <- identical(par("mfg")[1:2], par("mfg")[3:4])
 
     ## If a high-level plotting functions like 'plot' or 'hist'
-    ## called 'plot.new' we are done. 
+    ## called 'plot.new' we are done.
     highLevelPlotNew = .calledFromHighLevelPlottingFunction()
 
     ## Set 'par' form last tab. This can either be
@@ -144,9 +144,9 @@ tabbedPlots.parHook <- function()
 {
     if (!.get("active"))
         return()
-    
+
     .called()
-    
+
     if (!.guiReady())
     {
         ## "par" was called before the gui was put up or
@@ -162,9 +162,9 @@ tabbedPlots.layoutHook <- function()
 {
     if (!.get("active"))
         return()
-    
+
     .called()
-    
+
     if (!.guiReady())
     {
         ## "layout" was called before the gui was put up.
@@ -178,7 +178,7 @@ tabbedPlots.layoutHook <- function()
 tabbedPlots <- function()
 {
     .in()
-    
+
     if (!is.null(.get("gui")))
     {
         .out()
@@ -187,17 +187,17 @@ tabbedPlots <- function()
 
     ## Create main GUI.
     gui <- .createGui()
-    
+
     if (is.null(gui))
     {
         .errorDialog(paste("Failed to create tabbedPlots GUI!",
                            "Please check your GTK installation."))
         .set("active", FALSE)
-        
+
         .out()
         return(FALSE)
     }
-        
+
     ## Sync gui up with R.
     .processPendingEvents()
 
@@ -210,8 +210,8 @@ tabbedPlots <- function()
 tabbedPlots.new <- function()
 {
     if (.newTab())
-    {    
-        ## Set 'par' form last tab. 
+    {
+        ## Set 'par' form last tab.
         if (.get("reusePar") && !is.null(.get("lastPar")))
         {
             par(.get("lastPar"))
@@ -225,7 +225,7 @@ tabbedPlots.close <- function()
 {
     if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
         return(FALSE)
-    
+
     pageNum <- .get("notebook")$GetCurrentPage()
     .closeTab(pageNum)
     return(TRUE)
@@ -248,7 +248,7 @@ tabbedPlots.save <- function(file, device = NULL,
 {
     if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
         return(FALSE)
-        
+
     extension = .getExtension(file)
 
     ## Check the arguments.
@@ -257,10 +257,10 @@ tabbedPlots.save <- function(file, device = NULL,
 
     if (is.null(device))
         return(FALSE)
-      
+
     if (is.character(device))
         device <- get(device)
-    
+
     if (!is.function(device))
     {
         .warning("'device' must be either a character or function.", warn)
@@ -276,7 +276,7 @@ tabbedPlots.save <- function(file, device = NULL,
 
         myArgs <- c("file", "width", "height", "pointsize")
         myArgsIdx <- pmatch(myArgs, deviceArgNames, nomatch = 0)
-        
+
         args <- list(device = device)
 
         for (i in seq(along = myArgs))
@@ -304,7 +304,7 @@ tabbedPlots.save <- function(file, device = NULL,
             if ("paper" %in% deviceArgNames)
                 args["paper"] <- "special"
         }
-                    
+
         args <- .mergeLists(list(...), args)
 
         do.call("dev.copy", args)
@@ -312,7 +312,7 @@ tabbedPlots.save <- function(file, device = NULL,
         dev.off()
     }
     return(TRUE)
-}       
+}
 
 ## Primitive print.
 ## TODO: Use the GTK2 print functionality. This involves drawing into
@@ -326,7 +326,7 @@ tabbedPlots.print <- function(warn = NULL)
 
     path = tempfile()
     on.exit(try(file.remove(path), silent = TRUE))
-    
+
     tabbedPlots.save(path, "postscript", warn = warn)
 
     if (file.exists(path))
@@ -361,7 +361,7 @@ tabbedPlots.nextTab <- function()
     notebook <- .get("notebook")
     curPage <- notebook$GetCurrentPage()
     notebook$NextPage()
-    
+
     ## Sync gui up with R.
     .processPendingEvents()
     return(curPage != notebook$GetCurrentPage())
@@ -376,7 +376,7 @@ tabbedPlots.prevTab <- function()
     notebook <- .get("notebook")
     curPage <- notebook$GetCurrentPage()
     notebook$PrevPage()
-    
+
     ## Sync gui up with R.
     .processPendingEvents()
     return(curPage != notebook$GetCurrentPage())
@@ -391,7 +391,7 @@ tabbedPlots.warning <- function()
 }
 
 
-tabbedPlots.runTests <- function(tests = "ALL")
+tabbedPlots.runTests <- function(tests = "ALL", manual.new=TRUE)
 {
     if (tests == "ALL")
         tests <- c(".testNewCloseExit", ".testLayout", ".testComplexPlot",
@@ -410,6 +410,7 @@ tabbedPlots.runTests <- function(tests = "ALL")
     for (test in tests)
     {
         cat("\nRunning test", test, "\n")
-        eval(call(test))
-    }    
+        do.call(test, list(manual.new=manual.new))
+        # eval(call(test))
+    }
 }
