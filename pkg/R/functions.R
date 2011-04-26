@@ -63,7 +63,7 @@
     ## level plot funcitons we want to track.
     require("graphics")
 
-    setHook("plot.prenew", tabbedPlots.prePlotNewHook)
+    setHook("before.plot.new", tabbedPlots.prePlotNewHook)
     setHook("plot.new", tabbedPlots.postPlotNewHook)
     ## Old way was using trace() for hook:
     if (F) {
