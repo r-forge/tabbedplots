@@ -1,0 +1,71 @@
+\section{Installation Issues}{
+
+NOTE: installation of RGtk2 seems to change frequently -- different again in R-2.13.1
+
+  \url{http://cran.r-project.org/bin/windows/contrib/2.13/@ReadMe}:
+
+  \preformatted{
+  - Package RGtk2 requires an an installation of Gtk+ aka Gtk2 >= 2.20.
+  For 32-bit R, version 2.20 or later from
+    http://www.gtk.org/download-windows.html, e.g.
+    http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.22/gtk+-bundle_2.22.0-20101016_win32.zip
+  For 64-bit R, version 2.20 or later from
+    http://www.gtk.org/download-windows-64bit.html, e.g.
+    http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.0-20101016_win64.zip
+  In each case, unpack the zip file in a suitable empty directory and
+    put the 'bin' directory in your path.  NB: the 32-bit and 64-bit
+    distributions contain DLLs of the same names, and so you must ensure
+    that you have the 32-bit version in your path when running 32-bit R
+    and the 64-bit version when running 64-bit R - and the error messages
+    you get with the wrong version are confusing.
+  }
+
+I also had frustrations trying to use libary RGtk2 under Windows XP.
+
+I kept getting the message
+  "unable to load shared object C:\R\site-library\RGtk2\libs\i386\RGtk2.dll"
+even though it was on my path.
+
+Uninstalling and reinstalling various versions of GTK2, both through R
+and outside R, many times, including rebooting Windows, did not help.
+
+With the help of some comments on R-help (Neil Rice, Mar 7, 2011), I found that
+there was another conflicting version of zlib1.dll in a directory on my PATH.
+Removing that directory from the path (inside R) fixed the problem and RGtk2 runs
+fine now.
+
+Here's an R expression to look for copies of the various DLLs that GTK2 uses:
+
+\preformatted{
+> for (dll in list.files("c:/GTK2-Runtime/bin/", pattern="*.dll$")) print(with(list(x=file.path(strsplit(Sys.getenv("PATH"), ";")[[1]], dll)), x[file.exists(x)]))
+[1] "C:\\GTK2-Runtime\\bin/freetype6.dll"
+[1] "C:\\GTK2-Runtime\\bin/intl.dll"
+[1] "C:\\GTK2-Runtime\\bin/libatk-1.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libcairo-2.dll"
+[1] "C:\\GTK2-Runtime\\bin/libcairo-gobject-2.dll"
+[1] "C:\\GTK2-Runtime\\bin/libcairo-script-interpreter-2.dll"
+[1] "C:\\GTK2-Runtime\\bin/libexpat-1.dll"
+[1] "C:\\GTK2-Runtime\\bin/libfontconfig-1.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgailutil-18.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgdk-win32-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgdk_pixbuf-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgio-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libglib-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgmodule-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgobject-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgthread-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libgtk-win32-2.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libpango-1.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libpangocairo-1.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libpangoft2-1.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libpangowin32-1.0-0.dll"
+[1] "C:\\GTK2-Runtime\\bin/libpng14-14.dll"
+[1] "C:\\GTK2-Runtime\\bin/zlib1.dll"
+>
+}
+
+If there are any lines beginning with [2] in the output, these are potential
+problems (check that either the DLLs are the same version, or that the
+GTK2 version is ahead on the path).
+
+}
