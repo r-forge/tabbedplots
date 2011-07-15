@@ -346,6 +346,22 @@ tabbedPlots.print <- function(warn = NULL)
     return(FALSE)
 }
 
+tabbedPlots.copy <- function(warn = NULL)
+{
+    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+        return(FALSE)
+
+    notebook <- .get("notebook")
+    ## This copies the tab labels + the drawing area to the clipboard
+    ## Want to find a way to get just the drawing area in the child
+    daa <- notebook$getAllocation()$allocation
+    pixbuf <- gdkPixbufGetFromDrawable(src=notebook$window, src.x=daa$x, src.y=daa$y, dest.x=0, dest.y=0,
+                                       width=daa$width, height=daa$height)
+    gtkClipboardGet("CLIPBOARD")$setImage(pixbuf)
+
+    return(FALSE)
+}
+
 
 tabbedPlots.quit <- function()
 {

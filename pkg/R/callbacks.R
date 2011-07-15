@@ -6,13 +6,14 @@
 
 .onNewActivate <- function(action, window)
 {
-    .called(".onNewActivate")    
+    .called(".onNewActivate")
     tabbedPlots.new()
 }
 
 
 .onCloseActivate <- function(action, window)
 {
+    ## close just the active plot
     .called(".onCloseActivate")
     tabbedPlots.close()
 }
@@ -26,13 +27,13 @@
     {
         .warnDialog("Nothing to save!")
         return()
-    }   
-    
+    }
+
     ## Obtain filename to save to.
     path <- .saveFileDialog(window)
     if (is.null(path))
         return()
-    
+
     if (file.exists(path))
         if (is.null(.questionDialog("The file", path,
                                     "already exists. Do you want to overwrite",
@@ -53,16 +54,28 @@
 .onPrintActivate <- function(action, window)
 {
     .called(".onPrintActivate")
-    
+
     if (length(.get("devList")) < 1)
     {
         .warnDialog("Nothing to print!")
         return()
     }
-    
+
     tabbedPlots.print(warn = "gui")
 }
 
+.onCopyActivate <- function(action, window)
+{
+    .called(".onCopyActivate")
+
+    if (length(.get("devList")) < 1)
+    {
+        .warnDialog("Nothing to copy!")
+        return()
+    }
+
+    tabbedPlots.copy(warn = "gui")
+}
 
 .onQuitActivate <- function(action, window)
 {
@@ -92,9 +105,9 @@
 {
     if (!.guiReady())
         return
-    
+
     ## 'pageNum' is zero based!
-    
+
     .called(sprintf(".onNotebookSwitchPage. pageNum: %d", pageNum))
 
     ## Now one based.
@@ -107,8 +120,8 @@
 .onButtonClicked <- function(button, data)
 {
     .called(".onButtonClicked")
-    
-    pageNum <- .get("notebook")$PageNum(data)    
+
+    pageNum <- .get("notebook")$PageNum(data)
     .closeTab(pageNum)
 }
 

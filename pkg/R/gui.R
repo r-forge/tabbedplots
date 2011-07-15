@@ -8,6 +8,7 @@
                     list("New", "gtk-new", "_New", "<control>N", "Create a new tab", .onNewActivate),
                     list("Close", "gtk-close", "_Close", "<control>W", "Close tab", .onCloseActivate),
                     list("Save", "gtk-save-as", "_Save", "<control>S", "Save current tab", .onSaveActivate),
+                    list("Copy", "gtk-copy", "_Copy", "<control>C", "Copy current tab to clipboard", .onCopyActivate),
                     list("Print", "gtk-print", "_Print", "<control>P", "Print current tab", .onPrintActivate),
                     list("Quit", "gtk-quit", "_Quit", "<control>Q", "Quit", .onQuitActivate),
                     list("About", "gtk-about", "_About", "<control>A", "About", .onAboutActivate)
@@ -44,6 +45,7 @@
                    "      <menuitem action='Close'/>",
                    "      <separator/>",
                    "      <menuitem action='Save'/>",
+                   "      <menuitem action='Copy'/>",
                    "      <menuitem action='Print'/>",
                    "      <separator/>",
                    "      <menuitem action='Quit'/>",

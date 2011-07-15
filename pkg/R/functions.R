@@ -136,11 +136,14 @@
         .savePar()
 
     nPages <- .get("notebook")$GetNPages()
+    plotNum <- .get("plotNum") + 1
+    plotName <- paste("Plot", plotNum)
+    .set("plotNum", plotNum)
 
     drawingArea <- gtkDrawingArea()
 
     hBox <- gtkHBox()
-    label1 <- gtkLabel(paste("Plot", nPages + 1))
+    label1 <- gtkLabel(plotName)
 
     ## The close button is made of an empty button
     ## where we set a "close" image.
@@ -152,9 +155,10 @@
     button$SetRelief(GtkReliefStyle[["none"]])
 
     hBox$PackStart(label1, TRUE, TRUE)
-    hBox$PackEnd(button, FALSE, FALSE)
+    ## Don't put the close button there! (too easy to click accidentally)
+    ## hBox$PackEnd(button, FALSE, FALSE)
 
-    label2 <- gtkLabel(paste("Plot", nPages + 1))
+    label2 <- gtkLabel(plotName)
 
     .get("notebook")$AppendPageMenu(drawingArea, hBox, label2)
 
