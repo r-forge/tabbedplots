@@ -21,36 +21,8 @@ tabbedPlots()
 }
 \references{ ~put references to the literature/web site here ~ }
 \author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
- ~Make other sections like Warning with \section{Warning }{....} ~
-}
 \seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function () 
-{
-    .in()
-    if (!is.null(.get("gui"))) {
-        .out()
-        return(TRUE)
-    }
-    gui <- .createGui()
-    if (is.null(gui)) {
-        .errorDialog(paste("Failed to create tabbedPlots GUI!", 
-            "Please check your GTK installation."))
-        .set("active", FALSE)
-        .out()
-        return(FALSE)
-    }
-    .processPendingEvents()
-    .out()
-    return(TRUE)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
