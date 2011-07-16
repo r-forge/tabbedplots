@@ -1,0 +1,11 @@
+                CHANGES in tabbedPlots version 0.3-0 (2011-07-15)
+ENHANCEMENTS
+    o   added a button for setting current tab to be the current device
+    o   added a button to clear a tab ready for replotting
+    o   made things work cleanly when a graphics device is not in a tabbedPlots() window
+    o   adds an initial drawing window when tabbedPlots() runs
+    o   added save-to-file using GTK functions
+    o   removed close button from each tab label (too easy to click)
+    o   added copy-to-clipboard functionality; triggered in any one
+    	of three ways: menu item; Ctrl-C or button
+    o	added copy and close buttons at right of menubar
