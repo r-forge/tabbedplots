@@ -73,7 +73,9 @@ tabbedPlots.prePlotNewHook <- function()
     if (!.get("active"))
         return()
 
-    .in()
+    ## If the current graphics device is not in a notebook, do nothing
+    if (!dev.cur() %in% .get("devList"))
+        return()
 
     .set("plotNew", FALSE)
 
@@ -92,17 +94,12 @@ tabbedPlots.prePlotNewHook <- function()
             ## it *must* be done here. If the user did a
             ## 'plot.new', we *have to* do it in 'postPlotNewHook'
             ## I call this 'Option 1'.
-            if (.get("reusePar") &&
-                .get("plotNew") &&
-                !is.null(.get("lastPar")) &&
-                highLevelPlotNew)
+            if (.get("reusePar") && .get("plotNew") && !is.null(.get("lastPar")) && highLevelPlotNew)
             {
                 par(.get("lastPar"))
             }
         }
     }
-
-    .out()
 }
 
 
@@ -111,7 +108,11 @@ tabbedPlots.postPlotNewHook <- function()
     if (!.get("active"))
         return()
 
-    .called()
+    .called("tabbedPlots.postPlotNewHook")
+
+    ## If the current graphics device is not in a notebook, do nothing
+    if (!dev.cur() %in% .get("devList"))
+        return()
 
     ## See if we are on the last figure. The plot is done
     ## if we have filled out all the figures in an array
@@ -140,12 +141,13 @@ tabbedPlots.postPlotNewHook <- function()
 }
 
 
+## tabbedPlots.parHook is not used now that the trace() stuff has been removed
 tabbedPlots.parHook <- function()
 {
     if (!.get("active"))
         return()
 
-    .called()
+    .called("tabbedPlots.parHook")
 
     if (!.guiReady())
     {
@@ -158,12 +160,13 @@ tabbedPlots.parHook <- function()
 }
 
 
+## tabbedPlots.layoutHook is not used now that the trace() stuff has been removed
 tabbedPlots.layoutHook <- function()
 {
     if (!.get("active"))
         return()
 
-    .called()
+    .called("tabbedPlots.layoutHook")
 
     if (!.guiReady())
     {
@@ -201,23 +204,28 @@ tabbedPlots <- function()
     ## Sync gui up with R.
     .processPendingEvents()
 
+    tabbedPlots.new()
+
     .out()
     return(TRUE)
 }
 
 ## New tab. Just like '.tabNew' except it
 ## can reuses the previous 'par'.
-tabbedPlots.new <- function()
+tabbedPlots.new <- function(label=NULL, reusePar=.get("reusePar"), warn=NULL)
 {
-    if (.newTab())
+    if (.newTab(label=label, warn=warn))
     {
         ## Set 'par' form last tab.
-        if (.get("reusePar") && !is.null(.get("lastPar")))
+        if (reusePar && !is.null(.get("lastPar")))
         {
             par(.get("lastPar"))
         }
     }
 }
+
+## tabp.new() is a synonym for tabbedPlots.new()
+tabp.new <- tabbedPlots.new
 
 
 ## Close current tab
@@ -244,72 +252,89 @@ tabbedPlots.close <- function()
 ## > tabbedPlots.save("lars2.png", png)
 ## > tabbedPlots.save("lars3.png", Cairo_png)
 tabbedPlots.save <- function(file, device = NULL,
-                             width = 7, height = 7, pointsize = 10, warn = NULL, ...)
+                             width = 7, height = 7, pointsize = 10, warn = NULL,
+                             use.dev.copy = FALSE, drawingArea = NULL, quality = 80, ...)
 {
     if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
         return(FALSE)
 
     extension = .getExtension(file)
 
-    ## Check the arguments.
-    if (is.null(device))
-        device <- .mapExtensionToDevice(extension, warn)
+    if (use.dev.copy) {
+        ## Check the arguments.
+        if (is.null(device))
+            device <- .mapExtensionToDevice(extension, warn)
 
-    if (is.null(device))
-        return(FALSE)
+        if (is.null(device))
+            return(FALSE)
 
-    if (is.character(device))
-        device <- get(device)
+        if (is.character(device))
+            device <- get(device)
 
-    if (!is.function(device))
-    {
-        .warning("'device' must be either a character or function.", warn)
-        return(FALSE)
-    }
-
-    ## Massage the arguments to fit the various types of devices.
-    ## Example; some devices has an argument called "file" others
-    ## "filename".
-    if (!is.null(device))
-    {
-        deviceArgNames <- names(formals(device))
-
-        myArgs <- c("file", "width", "height", "pointsize")
-        myArgsIdx <- pmatch(myArgs, deviceArgNames, nomatch = 0)
-
-        args <- list(device = device)
-
-        for (i in seq(along = myArgs))
-            if (myArgsIdx[i] > 0)
-                args[deviceArgNames[myArgsIdx[i]]] = get(myArgs[i])
-
-        if ("units" %in% deviceArgNames &&
-            "res" %in% deviceArgNames)
+        if (!is.function(device))
         {
-            args["units"] <- "in"
-            args["res"] <- 72
+            .warning("'device' must be either a character or function.", warn)
+            return(FALSE)
         }
 
-        ## This makes xfig "happy".
-        if ("onefile" %in% deviceArgNames)
-            args["onefile"] <- TRUE
-
-        ## Deal with 'ps' vs. 'eps'.
-        if (extension == "eps")
+        ## Massage the arguments to fit the various types of devices.
+        ## Example; some devices has an argument called "file" others
+        ## "filename".
+        if (!is.null(device))
         {
-            if ("horizontal" %in% deviceArgNames)
-                args["horizontal"] <- FALSE
+            deviceArgNames <- names(formals(device))
+
+            myArgs <- c("file", "width", "height", "pointsize")
+            myArgsIdx <- pmatch(myArgs, deviceArgNames, nomatch = 0)
+
+            args <- list(device = device)
+
+            for (i in seq(along = myArgs))
+                if (myArgsIdx[i] > 0)
+                    args[deviceArgNames[myArgsIdx[i]]] = get(myArgs[i])
+
+            if ("units" %in% deviceArgNames &&
+                "res" %in% deviceArgNames)
+            {
+                args["units"] <- "in"
+                args["res"] <- 72
+            }
+
+            ## This makes xfig "happy".
             if ("onefile" %in% deviceArgNames)
-                args["onefile"] <- FALSE
-            if ("paper" %in% deviceArgNames)
-                args["paper"] <- "special"
+                args["onefile"] <- TRUE
+
+            ## Deal with 'ps' vs. 'eps'.
+            if (extension == "eps")
+            {
+                if ("horizontal" %in% deviceArgNames)
+                    args["horizontal"] <- FALSE
+                if ("onefile" %in% deviceArgNames)
+                    args["onefile"] <- FALSE
+                if ("paper" %in% deviceArgNames)
+                    args["paper"] <- "special"
+            }
+
+            args <- .mergeLists(list(...), args)
+
+            do.call("dev.copy", args)
+
+            dev.off()
         }
-
-        args <- .mergeLists(list(...), args)
-
-        do.call("dev.copy", args)
-
-        dev.off()
+    } else {
+        formats <- gdkPixbufGetFormats()
+        formats <- sapply(formats[sapply(formats, gdkPixbufFormatIsWritable)], gdkPixbufFormatGetName)
+        extension <- switch(extension, jpg="jpeg", extension)
+        if (! extension %in% formats)
+            stop("format must be one of ", paste(formats, collapse=", "))
+        a <- drawingArea$getAllocation()$allocation
+        Sys.sleep(1) # give time for the dialog to go away, otherwise it will appear in the image!
+        pixbuf <- gdkPixbufGetFromDrawable(src=drawingArea$window, src.x=0, src.y=0, dest.x=0, dest.y=0, width=a$width, height=a$height)
+        # gdkPixbufSave(pixbuf, file, extension)
+        if (extension == "jpeg")
+            pixbuf$save(file, extension, "quality", as.character(round(quality)))
+        else
+            pixbuf$save(file, extension)
     }
     return(TRUE)
 }
@@ -352,11 +377,18 @@ tabbedPlots.copy <- function(warn = NULL)
         return(FALSE)
 
     notebook <- .get("notebook")
-    ## This copies the tab labels + the drawing area to the clipboard
-    ## Want to find a way to get just the drawing area in the child
-    daa <- notebook$getAllocation()$allocation
-    pixbuf <- gdkPixbufGetFromDrawable(src=notebook$window, src.x=daa$x, src.y=daa$y, dest.x=0, dest.y=0,
-                                       width=daa$width, height=daa$height)
+    if (FALSE) {
+        ## This copies the tab labels + the drawing area to the clipboard
+        ## Want to find a way to get just the drawing area in the child
+        a <- notebook$getAllocation()$allocation
+        pixbuf <- gdkPixbufGetFromDrawable(src=notebook$window, src.x=a$x, src.y=a$y, dest.x=0, dest.y=0,
+                                           width=a$width, height=a$height)
+    } else {
+        curPage <- .get("curPage")
+        da <- tag(notebook$GetTabLabel(notebook$GetNthPage(curPage-1)), "plotarea")
+        a <- da$getAllocation()$allocation
+        pixbuf <- gdkPixbufGetFromDrawable(src=da$window, src.x=0, src.y=0, dest.x=0, dest.y=0, width=a$width, height=a$height)
+    }
     gtkClipboardGet("CLIPBOARD")$setImage(pixbuf)
 
     return(FALSE)

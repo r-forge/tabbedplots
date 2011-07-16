@@ -29,8 +29,13 @@
         return()
     }
 
+    notebook <- .get("notebook")
+    curPage <- .get("curPage")
+    drawingArea <- tag(notebook$GetTabLabel(notebook$GetNthPage(curPage-1)), "plotarea")
+
     ## Obtain filename to save to.
-    path <- .saveFileDialog(window)
+    pathOpts <- .saveFileDialog(window)
+    path <- pathOpts$path
     if (is.null(path))
         return()
 
@@ -41,12 +46,16 @@
             return()
 
     ## Ask for some more information.
-    options <- .saveOptionsDialog(window, path)
-    if (is.null(options))
-        return()
+    if (pathOpts$dev.copy) {
+        options <- .saveOptionsDialog(window, path, drawingArea=drawingArea)
+        if (is.null(options))
+            return()
+    } else {
+        options <- list()
+    }
 
     ## Do the save.
-    args <- c(list(path, warn = "gui"), options)
+    args <- c(list(path, warn = "gui", drawingArea=drawingArea), options)
     do.call("tabbedPlots.save", args)
 }
 
@@ -75,6 +84,31 @@
     }
 
     tabbedPlots.copy(warn = "gui")
+}
+
+.onDevSetCurActivate <- function(action, window)
+{
+    .called(".onDevSetCurActivate")
+
+    if (length(.get("devList")) < 1)
+    {
+        .warnDialog("No existing graphics devices!")
+        return()
+    }
+
+    notebook <- .get("notebook")
+    curPage <- .get("curPage")
+    .set("plotDone", FALSE, curPage)
+
+    devList <- .get("devList")
+    dev.set(devList[curPage])
+}
+
+.onDevSetNewActivate <- function(action, window)
+{
+    .called(".onDevSetCurActivate")
+
+    tabbedPlots.new(warn = "gui")
 }
 
 .onQuitActivate <- function(action, window)

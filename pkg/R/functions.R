@@ -44,20 +44,6 @@
 {
     .called()
 
-    ## In order for special 'lm' plot to work right, we
-    ## have to make sure that 'tabbedPlots' is loaded
-    ## before 'stats'.
-    ## This is really a hack and demonstrates a weakness
-    ## using trace. There may well be other libraries
-    ## that have to be unloaded like this. We cannot
-    ## possible deal with them all here. The best thing
-    ## to do, it to load "tabbedPlots" in the first line
-    ## of your .Rprofile.
-    statsIsAlreadyLoaded <- match("stats", loadedNamespaces(),
-                                  nomatch = FALSE)
-    if (statsIsAlreadyLoaded)
-        try(unloadNamespace("stats"), silent = TRUE)
-
     ## Need here because we are called from .onLoad, where
     ## it might not be attached yet. It contains the high
     ## level plot funcitons we want to track.
@@ -65,32 +51,22 @@
 
     setHook("before.plot.new", tabbedPlots.prePlotNewHook)
     setHook("plot.new", tabbedPlots.postPlotNewHook)
-    ## Old way was using trace() for hook:
-    if (F) {
-        ## This is extremely subtle. The 'expression' part deferres evaluation
-        ## until later. Necessary to get the tracing right. '.GlobalEnv' is
-        ## needed because these high level plotting functons end up there.
-        trace("plot.new",
-              expression(tabbedPlots.prePlotNewHook()),
-              expression(tabbedPlots.postPlotNewHook()),
-              print = FALSE, where = .GlobalEnv)
-        trace("par", expression(tabbedPlots.parHook()),
-              print = FALSE, where = .GlobalEnv)
-        trace("layout", expression(tabbedPlots.layoutHook()),
-              print = FALSE, where = .GlobalEnv)
-    }
-
-    if (statsIsAlreadyLoaded)
-        require("stats", quietly = TRUE)
 }
 
 .removeHighLevelPlotFunctionHooks <- function()
 {
     .called()
 
-    untrace("plot.new", where = .GlobalEnv)
-    untrace("par", where = .GlobalEnv)
-    untrace("layout", where = .GlobalEnv)
+    ## Remove just the hooks we added
+    hooks <- getHook("before.plot.new")
+    hooks <- hooks[!sapply(hooks, identical, tabbedPlots.prePlotNewHook)]
+    setHook("before.plot.new", NULL, "replace")
+    for (hook in hooks) addHook("before.plot.new", hook, "append")
+
+    hooks <- getHook("plot.new")
+    hooks <- hooks[!sapply(hooks, identical, tabbedPlots.postPlotNewHook)]
+    setHook("plot.new", NULL, "replace")
+    for (hook in hooks) addHook("plot.new", hook, "append")
 }
 
 .getExtension <- function(path, tolower = TRUE)
@@ -117,7 +93,7 @@
 }
 
 ## Returns TRUE if tab was successfully created.
-.newTab <- function()
+.newTab <- function(label=NULL, warn=NULL)
 {
     .in()
 
@@ -137,26 +113,34 @@
 
     nPages <- .get("notebook")$GetNPages()
     plotNum <- .get("plotNum") + 1
-    plotName <- paste("Plot", plotNum)
     .set("plotNum", plotNum)
 
+    plotName <- if (!is.null(label)) label else paste("Plot", plotNum)
+
     drawingArea <- gtkDrawingArea()
+    assign("da.new", pos=1, drawingArea)
 
     hBox <- gtkHBox()
     label1 <- gtkLabel(plotName)
 
-    ## The close button is made of an empty button
-    ## where we set a "close" image.
-    button <- gtkButton()
-    gSignalConnect(button, "clicked",
-                   .onButtonClicked, drawingArea)
-    image <- gtkImageNewFromStock(GTK_STOCK_CLOSE, GtkIconSize[["menu"]])
-    button$SetImage(image)
-    button$SetRelief(GtkReliefStyle[["none"]])
+    closeButtonOnTab <- .get("closeButtonOnTab")
+    if (closeButtonOnTab) {
+        ## The close button is made of an empty button
+        ## where we set a "close" image.
+        ## Tends to be too easy to click accidentally, so it is optional
+        button <- gtkButton()
+        gSignalConnect(button, "clicked", .onButtonClicked, drawingArea)
+        image <- gtkImageNewFromStock(GTK_STOCK_CLOSE, GtkIconSize[["menu"]])
+        button$SetImage(image)
+        button$SetRelief(GtkReliefStyle[["none"]])
+    }
 
     hBox$PackStart(label1, TRUE, TRUE)
-    ## Don't put the close button there! (too easy to click accidentally)
-    ## hBox$PackEnd(button, FALSE, FALSE)
+    ## Attach the plot area as a tag so that we can easily get it when
+    ## we want to print or copy.
+    tag(hBox, "plotarea") <- drawingArea
+    if (closeButtonOnTab)
+        hBox$PackEnd(button, FALSE, FALSE)
 
     label2 <- gtkLabel(plotName)
 

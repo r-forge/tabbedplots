@@ -20,7 +20,9 @@
     toplevel$setTitle("R Tabbed Plots")
 
     ## Add menu and notebook.
+    ## topbar will contain menu and buttons
     vbox <- gtkVBoxNew(FALSE)
+    topbar <- gtkHBoxNew(FALSE)
     toplevel$add(vbox)
 
     agroup <- gtkActionGroupNew("AppWindowActions")
@@ -58,7 +60,38 @@
 
     manager$addUiFromString(uistr)
     menubar <- manager$getWidget("/MenuBar")
-    vbox$packStart(menubar, FALSE, TRUE, 0)
+    # vbox$packStart(menubar, FALSE, TRUE, 0)
+    topbar$packStart(menubar, FALSE, FALSE, 0)
+
+    # Set up a copy button next to the menu
+    close.button <- gtkButton()
+    gSignalConnect(close.button, "clicked", .onCloseActivate)
+    close.button$SetImage(gtkImageNewFromStock(GTK_STOCK_CLOSE, GtkIconSize[["menu"]]))
+    # close.button$SetText("Close")
+    close.button$SetRelief(GtkReliefStyle[["none"]])
+    close.button$SetTooltipText("Close active plot")
+    topbar$PackEnd(close.button, FALSE, FALSE)
+
+    copy.button <- gtkButton("Copy")
+    gSignalConnect(copy.button, "clicked", .onCopyActivate)
+    # copy.button$SetImage(gtkImageNewFromStock(GTK_STOCK_COPY, GtkIconSize[["menu"]]))
+    copy.button$SetRelief(GtkReliefStyle[["none"]])
+    copy.button$SetTooltipText("Copy active plot to clipboard")
+    topbar$PackEnd(copy.button, FALSE, FALSE)
+
+    setcur.button <- gtkButton("Set")
+    gSignalConnect(setcur.button, "clicked", .onDevSetCurActivate)
+    setcur.button$SetRelief(GtkReliefStyle[["none"]])
+    setcur.button$SetTooltipText("Make the current tab the active graphics device")
+    topbar$PackEnd(setcur.button, FALSE, FALSE)
+
+    setnew.button <- gtkButton("New")
+    gSignalConnect(setnew.button, "clicked", .onDevSetNewActivate)
+    setnew.button$SetRelief(GtkReliefStyle[["none"]])
+    setnew.button$SetTooltipText("Make a new tab the active graphics device")
+    topbar$PackEnd(setnew.button, FALSE, FALSE)
+
+    vbox$packStart(topbar, FALSE, FALSE, 0)
 
     notebook <- gtkNotebook()
     notebook$setScrollable(TRUE)

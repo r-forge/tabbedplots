@@ -8,9 +8,16 @@
 .env <- NULL
 
 ## Initialize private variables.
-.initialize <- function(packagePath)
+.initialize <- function(packagePath=NULL)
 {
-    .env <<- new.env()
+    if (find("tabbedPlots", mode="function")=="package:tabbedPlots") {
+        ## This works when the package is loaded in a namespace
+        .env <<- new.env()
+    } else {
+        ## Try to make ref to .env work even if not in a namespace
+        env.env <- as.environment(find(".env"))
+        assign(".env", envir=env.env, value=new.env())
+    }
 
     ## Path to package.
     .set("path", packagePath)
@@ -21,7 +28,9 @@
 
     ## These variables have package lifetime.
     ## If TRUE, copy par from last plot into new plot.
-    .set("reusePar", FALSE)
+    .set("reusePar", TRUE)
+
+    .set("closeButtonOnTab", FALSE)
 
     ## If TRUE, print debugging information.
     .set("debug", FALSE)
@@ -34,6 +43,9 @@
 
     ## Default plot save DPI.
     .set("save.dpi", 72)
+
+    ## Default plot save quality
+    .set("save.quality", 70)
 
     ## Default plot save height.
     .set("save.height", 7)
