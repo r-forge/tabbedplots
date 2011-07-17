@@ -38,36 +38,6 @@ tabbedPlots.options <- function(...)
     }
 }
 
-
-## tabbedPlotsHook <- function()
-## {
-##     .in()
-##
-##     ## Remove the device that was just created, if tabbedPlots
-##     ## GUI is not up.
-##
-##     if (!exists(".gui") || is.null(.gui))
-##     {
-##         cat("Calling dev.off\n")
-##         dev.off()
-##     }
-##
-##     ## Create GUI if necessary and add a new tab with our own device.
-##     if (is.null(.gui))
-##         tabbedPlots()
-##     else
-##         tabbedPlots.new()
-##
-##     ## Make sure that plot.new is called with
-##     ## the new device in place.
-##     setHook("plot.new", NULL, "replace")
-##     plot.new()
-##     setHook("plot.new", tabbedPlotsHook)
-##
-##     .out()
-## }
-
-
 tabbedPlots.prePlotNewHook <- function()
 {
     if (!.get("active"))
@@ -178,18 +148,18 @@ tabbedPlots.layoutHook <- function()
 }
 
 ## Returns TRUE if GUI was successfully created.
-tabbedPlots <- function()
+tabbedPlots <- function(title=NULL)
 {
     .in()
 
-    if (!is.null(.get("gui")))
+    if (!is.null(.get("guiWindow")))
     {
         .out()
         return(TRUE)
     }
 
     ## Create main GUI.
-    gui <- .createGui()
+    gui <- .createGui(title=title)
 
     if (is.null(gui))
     {
@@ -208,6 +178,16 @@ tabbedPlots <- function()
 
     .out()
     return(TRUE)
+}
+
+tabbedPlots.windowTitle <- function(title=NULL)
+{
+    if (!is.null(.get("guiWindow")))
+    {
+        .out()
+        return(TRUE)
+    }
+    .get("guiWindow")$setTitle(title)
 }
 
 ## New tab. Just like '.tabNew' except it
@@ -231,10 +211,10 @@ tabp.new <- tabbedPlots.new
 ## Close current tab
 tabbedPlots.close <- function()
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
 
-    pageNum <- .get("notebook")$GetCurrentPage()
+    pageNum <- .getCurNotebook()$GetCurrentPage()
     .closeTab(pageNum)
     return(TRUE)
 }
@@ -255,7 +235,7 @@ tabbedPlots.save <- function(file, device = NULL,
                              width = 7, height = 7, pointsize = 10, warn = NULL,
                              use.dev.copy = FALSE, drawingArea = NULL, quality = 80, ...)
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
 
     extension = .getExtension(file)
@@ -346,13 +326,13 @@ tabbedPlots.save <- function(file, device = NULL,
 ## See Gimp "File/Print...".
 tabbedPlots.print <- function(warn = NULL)
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
 
     path = tempfile()
     on.exit(try(file.remove(path), silent = TRUE))
 
-    tabbedPlots.save(path, "postscript", warn = warn)
+    tabbedPlots.save(path, "postscript", use.dev.copy = TRUE, warn = warn)
 
     if (file.exists(path))
     {
@@ -373,10 +353,10 @@ tabbedPlots.print <- function(warn = NULL)
 
 tabbedPlots.copy <- function(warn = NULL)
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
 
-    notebook <- .get("notebook")
+    notebook <- .getCurNotebook()
     if (FALSE) {
         ## This copies the tab labels + the drawing area to the clipboard
         ## Want to find a way to get just the drawing area in the child
@@ -403,10 +383,10 @@ tabbedPlots.quit <- function()
 
 tabbedPlots.nextTab <- function()
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
 
-    notebook <- .get("notebook")
+    notebook <- .getCurNotebook()
     curPage <- notebook$GetCurrentPage()
     notebook$NextPage()
 
@@ -418,10 +398,10 @@ tabbedPlots.nextTab <- function()
 
 tabbedPlots.prevTab <- function()
 {
-    if (is.null(.get("gui")) || !.get("notebook")$GetNPages())
+    if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return (FALSE)
 
-    notebook <- .get("notebook")
+    notebook <- .getCurNotebook()
     curPage <- notebook$GetCurrentPage()
     notebook$PrevPage()
 

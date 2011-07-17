@@ -111,7 +111,7 @@
     if (.get("reusePar") && length(.get("devList")) > 0)
         .savePar()
 
-    nPages <- .get("notebook")$GetNPages()
+    nPages <- .getCurNotebook()$GetNPages()
     plotNum <- .get("plotNum") + 1
     .set("plotNum", plotNum)
 
@@ -144,9 +144,9 @@
 
     label2 <- gtkLabel(plotName)
 
-    .get("notebook")$AppendPageMenu(drawingArea, hBox, label2)
+    .getCurNotebook()$AppendPageMenu(drawingArea, hBox, label2)
 
-    .get("notebook")$SetCurrentPage(nPages)
+    .getCurNotebook()$SetCurrentPage(nPages)
 
     asCairoDevice(drawingArea)
 
@@ -171,7 +171,7 @@
 {
     if (pageNum != -1)
     {
-        .get("notebook")$RemovePage(pageNum)
+        .getCurNotebook()$RemovePage(pageNum)
 
         ## Update lists.
         .rm("devList", pageNum + 1)
@@ -181,20 +181,20 @@
         .processPendingEvents()
 
         ## We switched page.
-        if (.get("notebook")$GetNPages() < 1)
+        if (.getCurNotebook()$GetNPages() < 1)
         {
             .set("plotDone", TRUE)
             .switchedPage(1)
         }
         else
-            .switchedPage(.get("notebook")$GetCurrentPage() + 1)
+            .switchedPage(.getCurNotebook()$GetCurrentPage() + 1)
     }
 }
 
 
 .quit <- function()
 {
-    if (!is.null(.get("gui")))
+    if (!is.null(.get("guiWindow")))
         .get("guiWindow")$destroy()
 
     .reset()
@@ -226,8 +226,8 @@
 ## Check to see if gui is up and has pages.
 .guiReady <- function()
 {
-    return (!is.null(.get("gui")) && !is.null(.get("notebook")) &&
-            .get("notebook")$GetNPages() != 0)
+    return (!is.null(.get("guiWindow")) && !is.null(.getCurNotebook()) &&
+            .getCurNotebook()$GetNPages() != 0)
 }
 
 
@@ -361,4 +361,13 @@
         .warning("Unknown file extension.", warn)
 
     device
+}
+
+.getCurNotebook <- function(guiWindow=NULL) {
+    if (is.null(guiWindow))
+        guiWindow <- .get("guiWindow")
+    notebook <- tag(guiWindow, "notebook")
+    if (is.null(notebook))
+        stop("notebook tag on guiWindow is NULL!")
+    notebook
 }

@@ -1,4 +1,10 @@
-                CHANGES in tabbedPlots version 0.3-0 (2011-07-15)
+                CHANGES in tabbedPlots version 0.3-1 (2011-07-17)
+ENHANCEMENTS
+    o	add title= argument to tabbedPlots()
+    o	add function tabbedPlots.windowTitle() to set title of existing window
+    o	getting rid of 'notebook' var in .env in preparation for supporting multiple
+    	tabbed plot windows
+
 ENHANCEMENTS
     o   added a button for setting current tab to be the current device
     o   added a button to clear a tab ready for replotting

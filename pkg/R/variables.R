@@ -10,8 +10,8 @@
 ## Initialize private variables.
 .initialize <- function(packagePath=NULL)
 {
-    if (find("tabbedPlots", mode="function")=="package:tabbedPlots") {
-        ## This works when the package is loaded in a namespace
+    if ("tabbedPlots" %in% loadedNamespaces()) {
+        ## This works when the package is loaded normally in a namespace
         .env <<- new.env()
     } else {
         ## Try to make ref to .env work even if not in a namespace
@@ -21,6 +21,9 @@
 
     ## Path to package.
     .set("path", packagePath)
+
+    ## List of windows
+    .set("windows", list())
 
     ## These variables have package lifetime.
     ## If TRUE, tabbed plots are turned on.
@@ -71,7 +74,6 @@
 ## GUI lifetime.
 .reset <- function()
 {
-    .set("gui", NULL)
     .set("guiWindow", NULL)
     .set("notebook", NULL)
 

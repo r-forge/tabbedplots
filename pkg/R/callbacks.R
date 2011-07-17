@@ -29,7 +29,7 @@
         return()
     }
 
-    notebook <- .get("notebook")
+    notebook <- .getCurNotebook()
     curPage <- .get("curPage")
     drawingArea <- tag(notebook$GetTabLabel(notebook$GetNthPage(curPage-1)), "plotarea")
 
@@ -59,7 +59,6 @@
     do.call("tabbedPlots.save", args)
 }
 
-
 .onPrintActivate <- function(action, window)
 {
     .called(".onPrintActivate")
@@ -83,6 +82,8 @@
         return()
     }
 
+    browser()
+
     tabbedPlots.copy(warn = "gui")
 }
 
@@ -96,7 +97,7 @@
         return()
     }
 
-    notebook <- .get("notebook")
+    notebook <- .getCurNotebook()
     curPage <- .get("curPage")
     .set("plotDone", FALSE, curPage)
 
@@ -106,7 +107,7 @@
 
 .onDevSetNewActivate <- function(action, window)
 {
-    .called(".onDevSetCurActivate")
+    .called(".onDevSetNewActivate")
 
     tabbedPlots.new(warn = "gui")
 }
@@ -155,7 +156,7 @@
 {
     .called(".onButtonClicked")
 
-    pageNum <- .get("notebook")$PageNum(data)
+    pageNum <- .getCurNotebook()$PageNum(data)
     .closeTab(pageNum)
 }
 

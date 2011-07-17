@@ -1,4 +1,4 @@
-.createGui <- function()
+.createGui <- function(title=NULL)
 {
     ## Create the actions
     entries <- list(
@@ -14,10 +14,14 @@
                     list("About", "gtk-about", "_About", "<control>A", "About", .onAboutActivate)
                     )
 
+    nWindow <- length(.get("windows"))+1
+    ## Titles do not have to be unique among windows
+    if (is.null(title)) title <- paste("R Tabbed Plots [", nWindow, "]", sep="")
+
     ## Create a window
     toplevel <- gtkWindowNew("toplevel", show = FALSE)
-    toplevel$setPosition("GTK_WIN_POS_CENTER_ALWAYS")
-    toplevel$setTitle("R Tabbed Plots")
+    ## toplevel$setPosition("GTK_WIN_POS_CENTER_ALWAYS")
+    toplevel$setTitle(title)
 
     ## Add menu and notebook.
     ## topbar will contain menu and buttons
@@ -65,7 +69,7 @@
 
     # Set up a copy button next to the menu
     close.button <- gtkButton()
-    gSignalConnect(close.button, "clicked", .onCloseActivate)
+    gSignalConnect(close.button, "clicked", .onCloseActivate, toplevel)
     close.button$SetImage(gtkImageNewFromStock(GTK_STOCK_CLOSE, GtkIconSize[["menu"]]))
     # close.button$SetText("Close")
     close.button$SetRelief(GtkReliefStyle[["none"]])
@@ -73,20 +77,20 @@
     topbar$PackEnd(close.button, FALSE, FALSE)
 
     copy.button <- gtkButton("Copy")
-    gSignalConnect(copy.button, "clicked", .onCopyActivate)
+    gSignalConnect(copy.button, "clicked", .onCopyActivate, toplevel)
     # copy.button$SetImage(gtkImageNewFromStock(GTK_STOCK_COPY, GtkIconSize[["menu"]]))
     copy.button$SetRelief(GtkReliefStyle[["none"]])
     copy.button$SetTooltipText("Copy active plot to clipboard")
     topbar$PackEnd(copy.button, FALSE, FALSE)
 
     setcur.button <- gtkButton("Set")
-    gSignalConnect(setcur.button, "clicked", .onDevSetCurActivate)
+    gSignalConnect(setcur.button, "clicked", .onDevSetCurActivate, toplevel)
     setcur.button$SetRelief(GtkReliefStyle[["none"]])
     setcur.button$SetTooltipText("Make the current tab the active graphics device")
     topbar$PackEnd(setcur.button, FALSE, FALSE)
 
     setnew.button <- gtkButton("New")
-    gSignalConnect(setnew.button, "clicked", .onDevSetNewActivate)
+    gSignalConnect(setnew.button, "clicked", .onDevSetNewActivate, toplevel)
     setnew.button$SetRelief(GtkReliefStyle[["none"]])
     setnew.button$SetTooltipText("Make a new tab the active graphics device")
     topbar$PackEnd(setnew.button, FALSE, FALSE)
@@ -99,17 +103,18 @@
     vbox$packStart(notebook, TRUE, TRUE, 0)
 
     ## More actions.
-    gSignalConnect(notebook, "switch_page",
-                   .onNotebookSwitchPage)
-    gSignalConnect(toplevel, "destroy",
-                   .onTabbedPlotsDestroy)
+    gSignalConnect(notebook, "switch_page", .onNotebookSwitchPage)
+    gSignalConnect(toplevel, "destroy", .onTabbedPlotsDestroy)
 
     toplevel$setDefaultSize(.get("width"), .get("height"))
     toplevel$showAll()
+    tag(toplevel, "windowNum") <- nWindow
+    tag(toplevel, "notebook") <- notebook
 
-    .set("gui", toplevel)
     .set("guiWindow", toplevel)
+    ## the 'notebook' var should no longer be needed because it is a tag in guiWindow
     .set("notebook", notebook)
+    .set("windows", toplevel, nWindow)
 
     toplevel
 }
