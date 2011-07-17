@@ -61,12 +61,12 @@
     hooks <- getHook("before.plot.new")
     hooks <- hooks[!sapply(hooks, identical, tabbedPlots.prePlotNewHook)]
     setHook("before.plot.new", NULL, "replace")
-    for (hook in hooks) addHook("before.plot.new", hook, "append")
+    for (hook in hooks) setHook("before.plot.new", hook, "append")
 
     hooks <- getHook("plot.new")
     hooks <- hooks[!sapply(hooks, identical, tabbedPlots.postPlotNewHook)]
     setHook("plot.new", NULL, "replace")
-    for (hook in hooks) addHook("plot.new", hook, "append")
+    for (hook in hooks) setHook("plot.new", hook, "append")
 }
 
 .getExtension <- function(path, tolower = TRUE)
