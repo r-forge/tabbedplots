@@ -1,7 +1,7 @@
 Package: tabbedPlots
 Type: Package
 Title: Tabbed Plots for R
-Version: 0.3-1
+Version: 0.3-2
 Date: 2011-07-17
 Author: Lars Hansen
 Maintainer: Tony Plate <tplate@acm.org>

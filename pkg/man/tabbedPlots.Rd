@@ -1,30 +1,27 @@
 \name{tabbedPlots}
 \alias{tabbedPlots}
+\alias{tabbedPlots.quit}
+\alias{tabbedPlots.windowTitle}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{ Functions to work with tabbedPlots windows }
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Functions to work with tabbedPlots windows.
 }
 \usage{
-tabbedPlots()
+tabbedPlots(title = NULL)
+tabbedPlots.quit()
+tabbedPlots.windowTitle(title)
 }
-%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{title}{ Title to use the window}
+}
 \details{
-  ~~ If necessary, more details than the description above ~~
+  \itemize{
+    \item{tabbedPlots()}{: Create a new tabbedPlots window to hold
+      multiple plots in tabs}
+    \item{tabbedPlots.quit()}{Close the active tabbedPlots window (i.e.,
+    the whole window, not just one tab)}
+    }
 }
-\value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
-}
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
-\examples{
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\seealso{ \link[=tabbedPlots.tabs]{Functions to work with tabbedPlots tabs} }
+\keyword{ graphics }
