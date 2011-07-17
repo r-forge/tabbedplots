@@ -28,13 +28,15 @@ tabbedPlots.options <- function(...)
     }
     else
     {
-        options <- list(...)
+        old.options <- options <- list(...)
 
         for (option in names(options))
             if (is.na(match(option, knowOptions)))
                 warning("unknown option ", option)
             else
                 .set(option, options[[option]])
+
+        old.options
     }
 }
 
@@ -209,7 +211,7 @@ tabp.new <- tabbedPlots.new
 
 
 ## Close current tab
-tabbedPlots.close <- function()
+tabbedPlots.close <- function(warn = NULL)
 {
     if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
@@ -233,7 +235,8 @@ tabbedPlots.close <- function()
 ## > tabbedPlots.save("lars3.png", Cairo_png)
 tabbedPlots.save <- function(file, device = NULL,
                              width = 7, height = 7, pointsize = 10, warn = NULL,
-                             use.dev.copy = FALSE, drawingArea = NULL, quality = 80, ...)
+                             use.dev.copy = FALSE, drawingArea = NULL, quality = 80,
+                             ...)
 {
     if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
