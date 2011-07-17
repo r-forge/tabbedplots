@@ -112,6 +112,20 @@
     tabbedPlots.new(warn = "gui")
 }
 
+.onNextActivate <- function(action, window)
+{
+    .called(".onNextActivate")
+
+    tabbedPlots.nextTab(warn = "gui")
+}
+
+.onPrevActivate <- function(action, window)
+{
+    .called(".onPrevActivate")
+
+    tabbedPlots.prevTab(warn = "gui")
+}
+
 .onQuitActivate <- function(action, window)
 {
     .called(".onQuitActivate")

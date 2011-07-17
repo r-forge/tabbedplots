@@ -381,7 +381,7 @@ tabbedPlots.quit <- function()
 }
 
 
-tabbedPlots.nextTab <- function()
+tabbedPlots.nextTab <- function(warn = NULL)
 {
     if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return(FALSE)
@@ -396,7 +396,7 @@ tabbedPlots.nextTab <- function()
 }
 
 
-tabbedPlots.prevTab <- function()
+tabbedPlots.prevTab <- function(warn = NULL)
 {
     if (is.null(.get("guiWindow")) || !.getCurNotebook()$GetNPages())
         return (FALSE)
