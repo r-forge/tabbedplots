@@ -15,7 +15,8 @@
 ##  present, calls made to par() and layout() before a graphics device
 ##  is open will have no effect.  In this situation, one must call
 ##  plot.new() before calling par() and layout().  Supplying
-##  manual.new=TRUE does this.
+##  manual.new=TRUE causes the tests to call plot.new() before they
+##  call par() and/or layout().
 ##
 ###########################################################################
 
