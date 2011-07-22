@@ -45,6 +45,8 @@ tabbedPlots.prePlotNewHook <- function()
     if (!.get("active"))
         return()
 
+    .called("tabbedPlots.prePlotNewHook")
+
     ## If the current graphics device is not in a notebook, do nothing
     if (!dev.cur() %in% .get("devList"))
         return()
@@ -54,9 +56,10 @@ tabbedPlots.prePlotNewHook <- function()
     ## It the user called 'plot.new' he must want a new
     ## tab eventhought the last one is not done.
     highLevelPlotNew = .calledFromHighLevelPlottingFunction()
+    notebook <- .getCurNotebook()
 
     ## Create a new tab (plot), if we need to.
-    if (.get("plotDone", .get("curPage")) || !highLevelPlotNew)
+    if (.get("plotDone", .getCurPage(notebook)) || !highLevelPlotNew)
     {
         if (.newTab())
         {
@@ -108,8 +111,9 @@ tabbedPlots.postPlotNewHook <- function()
     {
         par(.get("lastPar"))
     }
+    notebook <- .getCurNotebook()
 
-    .set("plotDone", highLevelPlotNew && lastFigure, .get("curPage"))
+    .set("plotDone", highLevelPlotNew && lastFigure, .getCurPage(notebook))
 }
 
 
@@ -120,6 +124,7 @@ tabbedPlots.parHook <- function()
         return()
 
     .called("tabbedPlots.parHook")
+    notebook <- .getCurNotebook()
 
     if (!.guiReady())
     {
@@ -127,7 +132,7 @@ tabbedPlots.parHook <- function()
         ## the gui has no pages.
         ## Create the gui and an empty tab to be filled in later.
         tabbedPlots.new()
-        .set("plotDone", FALSE, .get("curPage"))
+        .set("plotDone", FALSE, .getCurPage(notebook))
     }
 }
 
@@ -139,13 +144,14 @@ tabbedPlots.layoutHook <- function()
         return()
 
     .called("tabbedPlots.layoutHook")
+    notebook <- .getCurNotebook()
 
     if (!.guiReady())
     {
         ## "layout" was called before the gui was put up.
         ## Create the gui and an empty tab to be filled in later.
         tabbedPlots.new()
-        .set("plotDone", FALSE, .get("curPage"))
+        .set("plotDone", FALSE, .getCurPage(notebook))
     }
 }
 
@@ -367,7 +373,8 @@ tabbedPlots.copy <- function(warn = NULL)
         pixbuf <- gdkPixbufGetFromDrawable(src=notebook$window, src.x=a$x, src.y=a$y, dest.x=0, dest.y=0,
                                            width=a$width, height=a$height)
     } else {
-        curPage <- .get("curPage")
+        # curPage <- .get("curPage")
+        curPage <- .getCurPage(notebook)
         da <- tag(notebook$GetTabLabel(notebook$GetNthPage(curPage-1)), "plotarea")
         a <- da$getAllocation()$allocation
         pixbuf <- gdkPixbufGetFromDrawable(src=da$window, src.x=0, src.y=0, dest.x=0, dest.y=0, width=a$width, height=a$height)

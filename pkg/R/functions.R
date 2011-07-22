@@ -53,7 +53,14 @@
     setHook("plot.new", tabbedPlots.postPlotNewHook)
 }
 
-.removeHighLevelPlotFunctionHooks <- function()
+tabp.init <- function(zap=FALSE)
+{
+    .initialize()
+    .removeHighLevelPlotFunctionHooks(zap=zap)
+    .addHighLevelPlotFunctionHooks()
+}
+
+.removeHighLevelPlotFunctionHooks <- function(zap=FALSE)
 {
     .called()
 
@@ -61,12 +68,14 @@
     hooks <- getHook("before.plot.new")
     hooks <- hooks[!sapply(hooks, identical, tabbedPlots.prePlotNewHook)]
     setHook("before.plot.new", NULL, "replace")
-    for (hook in hooks) setHook("before.plot.new", hook, "append")
+    if (!zap)
+        for (hook in hooks) setHook("before.plot.new", hook, "append")
 
     hooks <- getHook("plot.new")
     hooks <- hooks[!sapply(hooks, identical, tabbedPlots.postPlotNewHook)]
     setHook("plot.new", NULL, "replace")
-    for (hook in hooks) setHook("plot.new", hook, "append")
+    if (!zap)
+        for (hook in hooks) setHook("plot.new", hook, "append")
 }
 
 .getExtension <- function(path, tolower = TRUE)
@@ -144,9 +153,10 @@
 
     label2 <- gtkLabel(plotName)
 
-    .getCurNotebook()$AppendPageMenu(drawingArea, hBox, label2)
+    notebook <- .getCurNotebook()
+    notebook$AppendPageMenu(drawingArea, hBox, label2)
 
-    .getCurNotebook()$SetCurrentPage(nPages)
+    notebook$SetCurrentPage(nPages)
 
     asCairoDevice(drawingArea)
 
@@ -158,7 +168,7 @@
 
     ## We explictly created this tab emply, so
     ## we know we are not done.
-    .set("plotDone", FALSE, .get("curPage"))
+    .set("plotDone", FALSE, .getCurPage(notebook))
 
     .set("plotNew", TRUE)
 
@@ -328,7 +338,7 @@
 ## device.
 .switchedPage <- function(pageNum)
 {
-    .set("curPage", pageNum)
+    # .set("curPage", pageNum)
 
     if (pageNum > 0 && pageNum <= length(.get("devList")))
     {
@@ -370,4 +380,9 @@
     if (is.null(notebook))
         stop("notebook tag on guiWindow is NULL!")
     notebook
+}
+
+.getCurPage <- function(notebook) {
+    # The RGtk2 keeps track of pages in a 0-based manner
+    notebook$GetCurrentPage() + 1
 }

@@ -120,7 +120,7 @@
 
     .set("guiWindow", toplevel)
     ## the 'notebook' var should no longer be needed because it is a tag in guiWindow
-    .set("notebook", notebook)
+    # .set("notebook", notebook)
     .set("windows", toplevel, nWindow)
 
     toplevel

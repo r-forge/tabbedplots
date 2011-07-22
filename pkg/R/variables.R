@@ -75,7 +75,7 @@
 .reset <- function()
 {
     .set("guiWindow", NULL)
-    .set("notebook", NULL)
+    # .set("notebook", NULL)
 
     ## Keep track of function call nesting. This is
     ## to make function call tracing output more
@@ -92,9 +92,6 @@
 
     ## Association of (one based) tab numbers to R device numbers.
     .set("devList", integer())
-
-    ## Keep track of current page. One based.
-    .set("curPage", 1)
 
     ## The plot is not finished yet. This can be because
     ## we have not gotten to the last figure in a multi-

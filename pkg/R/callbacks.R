@@ -30,7 +30,8 @@
     }
 
     notebook <- .getCurNotebook()
-    curPage <- .get("curPage")
+    # curPage <- .get("curPage")
+    curPage <- .getCurPage(notebook)
     drawingArea <- tag(notebook$GetTabLabel(notebook$GetNthPage(curPage-1)), "plotarea")
 
     ## Obtain filename to save to.
@@ -82,8 +83,6 @@
         return()
     }
 
-    browser()
-
     tabbedPlots.copy(warn = "gui")
 }
 
@@ -98,7 +97,8 @@
     }
 
     notebook <- .getCurNotebook()
-    curPage <- .get("curPage")
+    # curPage <- .get("curPage")
+    curPage <- .getCurPage(notebook)
     .set("plotDone", FALSE, curPage)
 
     devList <- .get("devList")
